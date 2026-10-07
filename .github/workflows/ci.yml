@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: sklad
+          POSTGRES_PASSWORD: sklad
+          POSTGRES_DB: sklad
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U sklad" --health-interval 3s --health-retries 20
+    env:
+      DATABASE_URL: postgresql+psycopg://sklad:sklad@localhost:5432/sklad
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.11"
+      - run: uv sync --frozen
+      - run: uv run ruff check .
+      - run: uv run pytest --cov --cov-report=term-missing
+      - name: Migrations apply to PostgreSQL and match models
+        working-directory: backend
+        run: |
+          uv run alembic upgrade head
+          uv run alembic check
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build

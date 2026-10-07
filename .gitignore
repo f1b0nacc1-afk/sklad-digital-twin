@@ -1,1 +1,41 @@
 .DS_Store
+Thumbs.db
+
+# Environment
+.env
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Node
+node_modules/
+frontend/dist/
+
+# Runtime data
+storage/
+*.db
+*.sqlite3
+
+# CV: datasets and weights live outside git
+datasets/*
+!datasets/README.md
+models_store/
+runs/
+*.pt
+*.onnx
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json

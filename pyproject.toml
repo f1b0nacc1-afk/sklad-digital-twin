@@ -1,0 +1,72 @@
+[project]
+name = "sklad-twin"
+version = "0.1.0"
+description = "ИС «Цифровой двойник склада» (ЦДС-2026): backend API и CV-конвейер"
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+    "sqlalchemy>=2.0.30",
+    "alembic>=1.13",
+    "psycopg[binary]>=3.2",
+    "pyjwt>=2.8",
+    "bcrypt>=4.1",
+    "python-multipart>=0.0.9",
+    "redis>=5.0",
+    "rq>=1.16",
+    "numpy>=1.26,<3",
+    "scipy>=1.13",
+    "opencv-python-headless>=4.10",
+    "shapely>=2.0",
+    "openpyxl>=3.1",
+]
+
+[project.optional-dependencies]
+# Detector (heavy: pulls torch). Install with: uv sync --extra ml
+ml = ["ultralytics>=8.3", "sahi>=0.11"]
+barcode = ["zxing-cpp>=2.2"]
+# Basler pylon; Hikrobot MVS SDK is installed from the vendor package.
+basler = ["pypylon>=4.0"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.2",
+    "pytest-cov>=5.0",
+    "httpx>=0.27",
+    "ruff>=0.6",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["backend/app", "cv"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["backend/alembic/versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM"]
+ignore = ["B008"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "cv"]
+
+[tool.ruff.lint.per-file-ignores]
+"backend/app/bootstrap.py" = ["E501"]
+"backend/tests/conftest.py" = ["E402"]
+
+[tool.pytest.ini_options]
+testpaths = ["backend/tests", "cv/tests"]
+pythonpath = ["backend", "."]
+addopts = "-q --import-mode=importlib"
+
+[tool.coverage.run]
+source = ["backend/app/services", "cv"]
+omit = ["*/tests/*"]

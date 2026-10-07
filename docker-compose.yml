@@ -1,0 +1,83 @@
+name: sklad-twin
+
+x-backend-env: &backend-env
+  DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-sklad}:${POSTGRES_PASSWORD:-sklad}@db:5432/${POSTGRES_DB:-sklad}
+  REDIS_URL: redis://redis:6379/0
+  JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me-in-production-0123456789}
+  JWT_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES:-720}
+  STORAGE_DIR: /data/storage
+  CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+  ADMIN_LOGIN: ${ADMIN_LOGIN:-admin}
+  ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin12345}
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sklad}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sklad}
+      POSTGRES_DB: ${POSTGRES_DB:-sklad}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment: *backend-env
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - storage:/data/storage
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  worker:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    command: ["rq", "worker", "scans", "--url", "redis://redis:6379/0"]
+    environment: *backend-env
+    volumes:
+      - storage:/data/storage
+    depends_on:
+      api:
+        condition: service_healthy
+
+  web:
+    build:
+      context: frontend
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  storage:

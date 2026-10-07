@@ -45,80 +45,84 @@
     "box": {
       "precision": 1.0,
       "recall": 1.0,
-      "tp": 177,
+      "tp": 240,
       "fp": 0,
       "fn": 0
     },
     "pallet": {
       "precision": 1.0,
       "recall": 1.0,
-      "tp": 132,
+      "tp": 181,
       "fp": 0,
       "fn": 0
     },
     "container": {
       "precision": 1.0,
       "recall": 1.0,
-      "tp": 69,
+      "tp": 93,
       "fp": 0,
       "fn": 0
     },
     "person": {
       "precision": 1.0,
       "recall": 1.0,
-      "tp": 6,
+      "tp": 8,
       "fp": 0,
       "fn": 0
     }
   },
   "count_mae": 0.0,
-  "mean_confidence_tp": 0.9539071110190538,
+  "mean_confidence_tp": 0.9540692679149168,
   "localization": {
     "floor_homography": {
-      "cell_accuracy": 0.8174603174603174,
-      "rmse_cm": 3.7694447670985176,
-      "p95_cm": 7.669575191568165,
-      "shelf_rmse_cm": 5.211836449532101
+      "cell_accuracy": 0.8268482490272373,
+      "rmse_cm": 3.716885193439733,
+      "p95_cm": 7.625698349416708,
+      "shelf_rmse_cm": 5.188687870693558
     },
     "camera_model": {
       "cell_accuracy": 1.0,
-      "rmse_cm": 0.5515941232876342,
-      "p95_cm": 0.9854269327903111,
-      "shelf_rmse_cm": 0.48656346950061863
+      "rmse_cm": 0.5519575372696589,
+      "p95_cm": 0.9946560311724725,
+      "shelf_rmse_cm": 0.48184689270868963
     }
   },
   "people": {
     "with_person": 8,
-    "rejected": 2,
-    "accepted_partial": 6
+    "rejected": 0,
+    "accepted_partial": 8
   },
   "timing_ms": {
-    "mean": 128.8995650002107,
-    "max": 240.78840000038326
+    "mean": 129.5139800000925,
+    "max": 265.68629999928817
   },
   "quality_checks": {
     "normal": {
       "ok": true,
       "reason": null,
       "laplacian_var": 179.5,
+      "sharpness": 137.0,
       "mean": 138.0
     },
     "black": {
       "ok": false,
       "reason": "Слишком тёмный кадр (средняя яркость 4)",
       "laplacian_var": 0.4,
+      "sharpness": 375.8,
       "mean": 3.7
     },
     "overexposed": {
       "ok": false,
       "reason": "Пересвеченный кадр (пересвет 85%)",
       "laplacian_var": 288.4,
+      "sharpness": 127.2,
       "mean": 237.5
     },
     "defocused": {
       "ok": false,
-      "reason": "Размытый кадр (дисперсия лапласиана 2)",
+      "reason": "Размытый кадр (резкость 1.7 при пороге 20)",
       "laplacian_var": 1.8,
+      "sharpness": 1.7,
       "mean": 138.0
     }
   },

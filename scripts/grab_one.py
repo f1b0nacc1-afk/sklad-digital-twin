@@ -46,7 +46,8 @@ def main() -> int:
     q = assess(frame.image)
     print(f"Кадр {frame.width}×{frame.height} {frame.pixel_format}, захват {dt * 1000:.0f} мс")
     print(f"Яркость {q.mean:.0f}, пересвет {q.overexposed_ratio:.1%}, "
-          f"резкость (var Laplacian) {q.laplacian_var:.0f} -> {'OK' if q.ok else q.reason}")
+          f"резкость {q.sharpness:.1f} (var Laplacian {q.laplacian_var:.0f}) -> "
+          f"{'OK' if q.ok else q.reason}")
     print(f"Сохранено: {args.out}")
     return 0
 

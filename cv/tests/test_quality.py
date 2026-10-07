@@ -37,6 +37,12 @@ def test_blurred_frame_rejected():
     assert not report.ok and "Размытый" in report.reason
 
 
+def test_dim_sharp_frame_passes():
+    dim = (textured().astype(np.float32) * 0.3).astype(np.uint8) + 10
+    report = assess(dim)
+    assert report.ok, report.reason
+
+
 def test_empty_image_rejected():
     assert not assess(np.zeros((0, 0), np.uint8)).ok
 

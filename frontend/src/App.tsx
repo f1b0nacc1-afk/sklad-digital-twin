@@ -2,6 +2,7 @@ import {
   AppstoreOutlined,
   BarChartOutlined,
   CameraOutlined,
+  ExperimentOutlined,
   HistoryOutlined,
   LogoutOutlined,
   SearchOutlined,
@@ -11,6 +12,7 @@ import { Button, Layout, Menu, Result, Space, Spin, Typography } from 'antd'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from './auth'
 import LoginPage from './pages/LoginPage'
+import StandPage from './pages/StandPage'
 import TwinPage from './pages/TwinPage'
 
 const ROLE_LABEL = { admin: 'Администратор', operator: 'Оператор', viewer: 'Наблюдатель' }
@@ -21,6 +23,7 @@ const MENU = [
   { key: '/objects', icon: <SearchOutlined />, label: 'Объекты' },
   { key: '/events', icon: <HistoryOutlined />, label: 'История' },
   { key: '/reports', icon: <BarChartOutlined />, label: 'Отчёты' },
+  { key: '/stand', icon: <ExperimentOutlined />, label: 'Виртуальный стенд' },
   { key: '/admin', icon: <SettingOutlined />, label: 'Администрирование', adminOnly: true },
 ]
 
@@ -68,6 +71,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Navigate to="/twin" replace />} />
             <Route path="/twin" element={<TwinPage />} />
+            <Route path="/stand" element={<StandPage />} />
             <Route path="*" element={<NotReady />} />
           </Routes>
         </Layout.Content>

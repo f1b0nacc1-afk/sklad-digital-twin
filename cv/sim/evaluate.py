@@ -175,7 +175,7 @@ def quality_checks(stand: Stand, cam: CameraModel, rng: np.random.Generator) -> 
     for name, img in cases.items():
         q = assess(img)
         out[name] = {"ok": q.ok, "reason": q.reason, "laplacian_var": round(q.laplacian_var, 1),
-                     "mean": round(q.mean, 1)}
+                     "sharpness": round(q.sharpness, 1), "mean": round(q.mean, 1)}
     return out
 
 

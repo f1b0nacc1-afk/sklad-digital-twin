@@ -12,7 +12,9 @@ class QualityThresholds:
     max_mean: float = 235.0
     max_overexposed_ratio: float = 0.05
     overexposed_level: int = 250
-    min_laplacian_var: float = 100.0
+    # Sharpness = var(Laplacian) / var(image) * 1000. Raw var(Laplacian) scales with contrast,
+    # so a sharp but dim frame looked defocused; the ratio does not depend on exposure.
+    min_sharpness: float = 20.0
     # Laplacian is computed on a downscaled copy: 20 MP is slow and noise inflates variance.
     analysis_width: int = 1600
 
@@ -24,6 +26,7 @@ class QualityReport:
     mean: float
     overexposed_ratio: float
     laplacian_var: float
+    sharpness: float = 0.0
 
 
 def to_mono8(image: np.ndarray) -> np.ndarray:
@@ -51,12 +54,13 @@ def assess(image: np.ndarray, t: QualityThresholds | None = None) -> QualityRepo
     mean = float(small.mean())
     over = float((small >= t.overexposed_level).mean())
     lap = float(cv2.Laplacian(small, cv2.CV_64F).var())
+    sharpness = lap / max(float(small.var()), 1e-6) * 1000
 
     reason = None
     if mean < t.min_mean:
         reason = f"Слишком тёмный кадр (средняя яркость {mean:.0f})"
     elif mean > t.max_mean or over > t.max_overexposed_ratio:
         reason = f"Пересвеченный кадр (пересвет {over:.0%})"
-    elif lap < t.min_laplacian_var:
-        reason = f"Размытый кадр (дисперсия лапласиана {lap:.0f})"
-    return QualityReport(reason is None, reason, mean, over, lap)
+    elif sharpness < t.min_sharpness:
+        reason = f"Размытый кадр (резкость {sharpness:.1f} при пороге {t.min_sharpness:g})"
+    return QualityReport(reason is None, reason, mean, over, lap, sharpness)

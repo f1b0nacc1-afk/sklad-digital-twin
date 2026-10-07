@@ -45,7 +45,7 @@ services:
     ports:
       - "${API_PORT:-8000}:8000"
     volumes:
-      - storage:/data/storage
+      - ./storage:/data/storage
     depends_on:
       db:
         condition: service_healthy
@@ -64,7 +64,7 @@ services:
     command: ["rq", "worker", "scans", "--url", "redis://redis:6379/0"]
     environment: *backend-env
     volumes:
-      - storage:/data/storage
+      - ./storage:/data/storage
     depends_on:
       api:
         condition: service_healthy
@@ -80,4 +80,3 @@ services:
 
 volumes:
   pgdata:
-  storage:

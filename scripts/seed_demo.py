@@ -1,24 +1,32 @@
 """Демо-данные: склад 30×15 м (ТЗ, прил. А) и настольный макет 1,2×0,8 м (стенд А).
 
-Запуск из корня репозитория:  uv run python scripts/seed_demo.py
-Повторный запуск не дублирует данные (склад ищется по названию).
+Запуск из корня репозитория:  uv run python scripts/seed_demo.py [--replace]
+Повторный запуск не дублирует данные (склад ищется по названию); --replace пересоздаёт
+демо-склады, если по ним ещё не было сканирований.
+Геометрия макета берётся из cv/sim/stands/maquette_a.json — того же описания, что у
+виртуального стенда.
 """
 
+import argparse
+import json
 import random
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "backend"))
 
-from sqlalchemy import select  # noqa: E402
+from sqlalchemy import delete, func, or_, select  # noqa: E402
 from sqlalchemy.orm import Session  # noqa: E402
 
 from app.bootstrap import bootstrap  # noqa: E402
 from app.core.db import SessionLocal  # noqa: E402
 from app.models import (  # noqa: E402
     Cell,
+    Detection,
     ObjectEvent,
     ObjectType,
+    OccupancySnapshot,
     Shelf,
     TrackedObject,
     Warehouse,
@@ -53,28 +61,47 @@ WAREHOUSE = {
     "floor_cells": {"C": 2.0},
 }
 
-MAQUETTE = {
-    "name": "Макет (стенд А)",
-    "address": "Лаборатория, стол 1,2×0,8 м",
-    "size": (1.2, 0.8, 0.5),
-    "zones": [
-        ("A", "Зона A — хранение", ZoneType.storage, rect(0, 0.42, 0.82, 0.8), "#cfe8ff"),
-        ("B", "Зона B — хранение", ZoneType.storage, rect(0, 0, 0.82, 0.38), "#d8f3dc"),
-        ("C", "Зона C — погрузка", ZoneType.loading, rect(0.88, 0, 1.2, 0.8), "#ffe5b4"),
-    ],
-    "shelves": [
-        ("A-01", "A", 0.2, 0.61, 0, 0.3, 0.1, 0.25, 3, 3),
-        ("A-02", "A", 0.6, 0.61, 0, 0.3, 0.1, 0.25, 3, 3),
-        ("B-01", "B", 0.2, 0.19, 0, 0.3, 0.1, 0.25, 3, 3),
-        ("B-02", "B", 0.6, 0.19, 0, 0.3, 0.1, 0.25, 3, 3),
-    ],
-    "floor_cells": {"C": 0.1},
-}
+def maquette_spec(path: Path = ROOT / "cv" / "sim" / "stands" / "maquette_a.json") -> dict:
+    s = json.loads(path.read_text(encoding="utf-8-sig"))
+    return {
+        "name": s["name"],
+        "address": s["address"],
+        "size": tuple(s["size"]),
+        "zones": [(z["code"], z["name"], ZoneType(z["type"]), z["polygon"], z["color"])
+                  for z in s["zones"]],
+        "shelves": [(sh["code"], sh["zone"], sh["x"], sh["y"], sh["rotation_deg"], sh["width"],
+                     sh["depth"], sh["height"], sh["levels"], sh["places"])
+                    for sh in s["shelves"]],
+        "floor_cells": s["floor_cells"],
+    }
 
 
-def seed_warehouse(db: Session, spec: dict, objects: int) -> Warehouse:
+def delete_warehouse(db: Session, wh: Warehouse) -> None:
+    zone_ids = list(db.scalars(select(Zone.id).where(Zone.warehouse_id == wh.id)))
+    used = db.scalar(select(func.count()).select_from(Detection)
+                     .where(Detection.zone_id.in_(zone_ids)))
+    used += db.scalar(select(func.count()).select_from(OccupancySnapshot)
+                      .where(OccupancySnapshot.zone_id.in_(zone_ids)))
+    if used:
+        raise SystemExit(f"{wh.name}: есть результаты сканирований, пересоздание отменено")
+    cell_ids = select(Cell.id).where(Cell.zone_id.in_(zone_ids))
+    object_ids = select(TrackedObject.id).where(or_(TrackedObject.current_zone_id.in_(zone_ids),
+                                                    TrackedObject.current_cell_id.in_(cell_ids)))
+    db.execute(delete(ObjectEvent).where(ObjectEvent.object_id.in_(object_ids)))
+    db.execute(delete(TrackedObject).where(TrackedObject.id.in_(object_ids)))
+    db.execute(delete(Cell).where(Cell.zone_id.in_(zone_ids)))
+    db.execute(delete(Shelf).where(Shelf.zone_id.in_(zone_ids)))
+    db.execute(delete(Zone).where(Zone.id.in_(zone_ids)))
+    db.delete(wh)
+    db.flush()
+    print(f"  - {wh.name} удалён (id={wh.id})")
+
+
+def seed_warehouse(db: Session, spec: dict, objects: int, replace: bool = False) -> Warehouse:
     existing = db.scalar(select(Warehouse).where(Warehouse.name == spec["name"]))
-    if existing:
+    if existing and replace:
+        delete_warehouse(db, existing)
+    elif existing:
         print(f"  = {spec['name']} уже есть (id={existing.id})")
         return existing
 
@@ -145,10 +172,13 @@ def _seed_objects(db: Session, zones: list[Zone], count: int) -> None:
 
 
 def main() -> None:
+    p = argparse.ArgumentParser()
+    p.add_argument("--replace", action="store_true", help="пересоздать демо-склады")
+    a = p.parse_args()
     with SessionLocal() as db:
         bootstrap(db)
-        seed_warehouse(db, WAREHOUSE, objects=25)
-        seed_warehouse(db, MAQUETTE, objects=12)
+        seed_warehouse(db, WAREHOUSE, objects=25, replace=a.replace)
+        seed_warehouse(db, maquette_spec(), objects=12, replace=a.replace)
     print("seed_demo: ok")
 
 

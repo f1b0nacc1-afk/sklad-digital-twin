@@ -10,6 +10,7 @@
 - [Рецензия на исходное ТЗ](docs/03_Рецензия_на_ТЗ.md)
 - [Дорожная карта разработки](docs/04_Дорожная_карта_разработки.md) — статус по модулям кода
 - [Виртуальный стенд](docs/05_Виртуальный_стенд.md) — распознавание на синтетических кадрах камеры, результаты испытания
+- [Журнал работ](docs/06_Журнал_работ.md) — что сделано по датам
 - Отчёты по оборудованию (открыть `index.html`):
   [Basler acA5472-17um](docs/equipment/basler-aca5472-17um-report/index.html),
   [Hikrobot MV-CE200-10UM](docs/equipment/hikrobot-mv-ce200-10um-report/index.html)
@@ -37,7 +38,7 @@ uv run alembic upgrade head           # схема БД
 uv run python -m app.bootstrap        # админ, справочник типов, настройки
 uv run uvicorn app.main:app --reload  # API на :8000
 cd ..
-uv run python scripts/seed_demo.py    # демо-данные
+uv run python scripts/seed_demo.py    # демо-данные (--replace — пересоздать)
 
 cd frontend && npm install && npm run dev   # UI на :5173, /api проксируется на :8000
 ```

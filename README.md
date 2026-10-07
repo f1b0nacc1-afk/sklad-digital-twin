@@ -9,6 +9,7 @@
 - [План реализации](docs/02_План_реализации.md) — календарный план на 16 недель
 - [Рецензия на исходное ТЗ](docs/03_Рецензия_на_ТЗ.md)
 - [Дорожная карта разработки](docs/04_Дорожная_карта_разработки.md) — статус по модулям кода
+- [Виртуальный стенд](docs/05_Виртуальный_стенд.md) — распознавание на синтетических кадрах камеры, результаты испытания
 - Отчёты по оборудованию (открыть `index.html`):
   [Basler acA5472-17um](docs/equipment/basler-aca5472-17um-report/index.html),
   [Hikrobot MV-CE200-10UM](docs/equipment/hikrobot-mv-ce200-10um-report/index.html)
@@ -76,6 +77,11 @@ backend/alembic/   миграции
 cv/
   sources/    CameraSource: file, video, basler, hikrobot
   quality.py  контроль качества кадра
+  camera_model.py   модель камеры: K + поза, проекция на плоскость заданной высоты
+  detector.py, tiling.py   YOLO, масштаб, тайлинг, NMS
+  pipeline.py       кадр -> качество -> детекции -> координаты -> ячейки
+  sim/        виртуальный стенд: сцена, рендер, датасет, испытание
+  training/   обучение YOLO
 frontend/src/
   pages/      экраны
   components/plan/   2D-план склада (react-konva)

@@ -31,8 +31,10 @@ datasets/*
 !datasets/README.md
 models_store/
 runs/
+weights/
 *.pt
 *.onnx
+*.log
 
 # IDE
 .idea/

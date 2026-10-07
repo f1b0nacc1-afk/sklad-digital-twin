@@ -1,0 +1,134 @@
+{
+  "weights": "models_store\\sklad-sim-v1.pt",
+  "scenes": 40,
+  "camera": {
+    "height_true_m": 1.1422300316264826,
+    "height_estimated_m": 1.1486159280712653,
+    "fov_floor_m": [
+      [
+        -0.012,
+        0.795
+      ],
+      [
+        1.24,
+        0.784
+      ],
+      [
+        1.236,
+        -0.057
+      ],
+      [
+        -0.026,
+        -0.041
+      ]
+    ],
+    "mm_per_px_floor": 0.22972138668894865,
+    "lighting_modes": [
+      "even",
+      "dim",
+      "side",
+      "bright"
+    ]
+  },
+  "calibration": {
+    "marker_fit_rmse_cm": 0.024151342273673725,
+    "floor_control_points": {
+      "homography_cm": 0.05240940479516288,
+      "camera_model_cm": 0.051533321941677486
+    },
+    "shelf_top_points": {
+      "homography_cm": 4.53584543333543,
+      "camera_model_cm": 0.04974206943271376
+    }
+  },
+  "detection": {
+    "box": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 177,
+      "fp": 0,
+      "fn": 0
+    },
+    "pallet": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 132,
+      "fp": 0,
+      "fn": 0
+    },
+    "container": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 69,
+      "fp": 0,
+      "fn": 0
+    },
+    "person": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 6,
+      "fp": 0,
+      "fn": 0
+    }
+  },
+  "count_mae": 0.0,
+  "mean_confidence_tp": 0.9539071110190538,
+  "localization": {
+    "floor_homography": {
+      "cell_accuracy": 0.8174603174603174,
+      "rmse_cm": 3.7694447670985176,
+      "p95_cm": 7.669575191568165,
+      "shelf_rmse_cm": 5.211836449532101
+    },
+    "camera_model": {
+      "cell_accuracy": 1.0,
+      "rmse_cm": 0.5515941232876342,
+      "p95_cm": 0.9854269327903111,
+      "shelf_rmse_cm": 0.48656346950061863
+    }
+  },
+  "people": {
+    "with_person": 8,
+    "rejected": 2,
+    "accepted_partial": 6
+  },
+  "timing_ms": {
+    "mean": 128.8995650002107,
+    "max": 240.78840000038326
+  },
+  "quality_checks": {
+    "normal": {
+      "ok": true,
+      "reason": null,
+      "laplacian_var": 179.5,
+      "mean": 138.0
+    },
+    "black": {
+      "ok": false,
+      "reason": "Слишком тёмный кадр (средняя яркость 4)",
+      "laplacian_var": 0.4,
+      "mean": 3.7
+    },
+    "overexposed": {
+      "ok": false,
+      "reason": "Пересвеченный кадр (пересвет 85%)",
+      "laplacian_var": 288.4,
+      "mean": 237.5
+    },
+    "defocused": {
+      "ok": false,
+      "reason": "Размытый кадр (дисперсия лапласиана 2)",
+      "laplacian_var": 1.8,
+      "mean": 138.0
+    }
+  },
+  "map": {
+    "map50": 0.995,
+    "per_class_map50": {
+      "box": 0.995,
+      "pallet": 0.995,
+      "container": 0.995,
+      "person": 0.995
+    }
+  }
+}
